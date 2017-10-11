@@ -17,12 +17,14 @@
 char buffer[BUFFER_MAX_LEN];
 
 void str2upper(char *str) {
-    for (int i = 0; i < strlen(str); i++) {
+    for (size_t i = 0; i < strlen(str); i++) {
         str[i] = toupper(str[i]);
     }
 }
 
 int main(int argc, char **argv) {
+    (void)argc;
+    (void)argv;
     // server address
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
@@ -59,9 +61,63 @@ int main(int argc, char **argv) {
         // epoll wait
         int active_fds_cnt = epoll_wait(epfd, my_events, EPOLL_MAX_NUM, -1);
         for(int i = 0; i < active_fds_cnt; i++) {
-            // listen_fd
-            // EPOLLIN
-            // EPOLLOUT
+            struct sockaddr_in  client_addr;
+            socklen_t           client_len;
+            if(my_events[i].data.fd == listen_fd) {
+                // listen_fd
+                int client_fd = accept(listen_fd, (struct sockaddr*)&client_addr, &client_len);
+                if(client_fd < 0) {
+                    perror("accept");
+                    continue;
+                }
+
+                char ip[20];
+                printf("new connection[%s:%d]\n", inet_ntop(AF_INET, &client_addr.sin_addr, ip, sizeof(ip)), ntohs(client_addr.sin_port));
+                event.events = EPOLLIN | EPOLLET;
+                event.data.fd = client_fd;
+                epoll_ctl(epfd, EPOLL_CTL_ADD, client_fd, &event);
+            } else if(my_events[i].events & EPOLLIN) {
+                // EPOLLIN
+                printf("EPOLLIN\n");
+                int client_fd = my_events[i].data.fd;
+                // do read
+                buffer[0] = '\0';
+                int n = read(client_fd, buffer, 5);
+                if(n < 0) {
+                    perror("read");
+                    continue;
+                } else if(n == 0) {
+                    epoll_ctl(epfd, EPOLL_CTL_DEL, client_fd, &event);
+                    close(client_fd);
+                } else {
+                    printf("[read]: %s\n", buffer);
+                    buffer[n] = '\0';
+                    str2upper(buffer);
+                    write(client_fd, buffer, strlen(buffer));
+                    printf("[write]: %s\n", buffer);
+                    memset(buffer, 0, BUFFER_MAX_LEN);
+                    /*
+                     event.events = EPOLLOUT;
+                     event.data.fd = client_fd;
+                     epoll_ctl(epfd, EPOLL_CTL_MOD, client_fd, &event);
+                     * */
+                }
+
+            } else if(my_events[i].events & EPOLLOUT) {
+                // EPOLLOUT
+                printf("EPOLLOUT\n");
+                /*
+                int client_fd = my_events[i].data.fd;
+                str2upper(buffer);
+                write(client_fd, buffer, strlen(buffer));
+                printf("[write]:%s\n", buffer);
+                memset(buffer, 0, BUFFER_MAX_LEN);
+
+                event.events = EPOLLIN;
+                event.data.fd = client_fd;
+                epoll_ctl(epfd, EPOLL_CTL_MOD, client_fd, &event);
+                 * */
+            }
         }
     }
 
