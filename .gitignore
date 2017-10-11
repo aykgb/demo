@@ -3,3 +3,10 @@ server
 a.out
 epoll_server
 epoll_client
+a.out
+build
+Makefile
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+res
