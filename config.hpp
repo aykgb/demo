@@ -1,5 +1,4 @@
-#ifndef __CONFIG_HPP_
-#define __CONFIG_HPP_
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,4 +21,3 @@
 #define handle_error(msg) \
     do { perror(msg); exit(EXIT_FAILURE); } while(0)
 
-#endif
