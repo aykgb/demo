@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    server_addr.sin_port = (SERVER_PORT);
+    server_addr.sin_port = htons(SERVER_PORT);
 
     // socket
     int listen_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -57,15 +57,16 @@ int main(int argc, char **argv) {
     }
     my_events = (struct epoll_event* )malloc(sizeof(struct epoll_event) * EPOLL_MAX_NUM);
 
+    int client_fd;
+    socklen_t client_len;
+    struct sockaddr_in  client_addr;
     while(1) {
         // epoll wait
         int active_fds_cnt = epoll_wait(epfd, my_events, EPOLL_MAX_NUM, -1);
         for(int i = 0; i < active_fds_cnt; i++) {
-            struct sockaddr_in  client_addr;
-            socklen_t           client_len;
-            if(my_events[i].data.fd == listen_fd) {
+           if(my_events[i].data.fd == listen_fd) {
                 // listen_fd
-                int client_fd = accept(listen_fd, (struct sockaddr*)&client_addr, &client_len);
+                client_fd = accept(listen_fd, (struct sockaddr*)&client_addr, &client_len);
                 if(client_fd < 0) {
                     perror("accept");
                     continue;
