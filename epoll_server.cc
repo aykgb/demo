@@ -55,18 +55,18 @@ int main(int argc, char **argv) {
         perror("epoll ctl add listen_fd");
         goto END;
     }
+
     my_events = (struct epoll_event* )malloc(sizeof(struct epoll_event) * EPOLL_MAX_NUM);
 
-    int client_fd;
-    socklen_t client_len;
-    struct sockaddr_in  client_addr;
     while(1) {
         // epoll wait
         int active_fds_cnt = epoll_wait(epfd, my_events, EPOLL_MAX_NUM, -1);
         for(int i = 0; i < active_fds_cnt; i++) {
            if(my_events[i].data.fd == listen_fd) {
                 // listen_fd
-                client_fd = accept(listen_fd, (struct sockaddr*)&client_addr, &client_len);
+                socklen_t client_len;
+                struct sockaddr_in  client_addr;
+                int client_fd = accept(listen_fd, (struct sockaddr*)&client_addr, &client_len);
                 if(client_fd < 0) {
                     perror("accept");
                     continue;
@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
                 int client_fd = my_events[i].data.fd;
                 // do read
                 buffer[0] = '\0';
-                int n = read(client_fd, buffer, 5);
+                int n = read(client_fd, buffer, BUFFER_MAX_LEN);
                 if(n < 0) {
                     perror("read");
                     continue;
