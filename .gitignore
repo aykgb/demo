@@ -3,6 +3,8 @@ server
 a.out
 epoll_server
 epoll_client
+echo_client
+echo_server
 a.out
 build
 Makefile
