@@ -19,9 +19,11 @@ link_libraries(
     boost_regex
     boost_thread
     boost_system
+    event
     )
 
 add_executable( echo_server echo_server.cc )
 add_executable( echo_client echo_client.cc )
 add_executable( epoll_server epoll_server.cc )
 add_executable( epoll_client epoll_client.cc )
+add_executable( ev_timer ev_timer.cc )
