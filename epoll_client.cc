@@ -10,7 +10,7 @@
 #include <fcntl.h>
 
 #define MAX_LINE    (1024)
-#define SERVER_PORT (7778)
+#define SERVER_PORT (8080)
 
 void setnoblocking(int fd) {
     int opts = 0;

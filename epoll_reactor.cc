@@ -192,7 +192,7 @@ int main(int argc, char* argv[])
 
     initlistensocket(g_efd, port);
 
-    /*时间循环*/
+    /* 时间循环 */
     struct epoll_event events[MAX_EVENTS + 1];
     printf("server running:port[%d]\n", port);
 
