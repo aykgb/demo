@@ -21,7 +21,7 @@ extern "C" {
 using namespace std;
 
 int tcp_connect_server(const char *server_ip, int port);
-void cmd_msg_cb(int fd, short events, void * arg);
+void terminal_msg_cb(int fd, short events, void * arg);
 void socket_read_cb(int fd, short events, void * arg);
 
 int main(int argc, char* argv[])
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
     ev_sockfd = event_new(base, sockfd,
             EV_READ | EV_PERSIST, socket_read_cb, NULL);
     ev_terminal = event_new(base, STDIN_FILENO,
-            EV_READ | EV_PERSIST, cmd_msg_cb, (void*)&sockfd);
+            EV_READ | EV_PERSIST, terminal_msg_cb, (void*)&sockfd);
 
     event_add(ev_sockfd, NULL);
     event_add(ev_terminal, NULL);
@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 int tcp_connect_server(const char *server_ip, int port) {
     /* Initialize server sockaddr. */
     struct sockaddr_in server_addr;
-    memset(&server_addr, 0, sizeof(struct sockaddr_in));
+    memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htonl(port);
     if(0 == inet_aton(server_ip, &server_addr.sin_addr)) {
@@ -75,11 +75,11 @@ int tcp_connect_server(const char *server_ip, int port) {
     }
 
     /* connect the fd. */
-    ;
     if(-1 == ::connect(sockfd,
                 (struct sockaddr *)&server_addr,
-                sizeof(struct sockaddr))) {
-        std::cout << "connect sockfd failed.\n";
+                sizeof(server_addr))) {
+        std::cout << "connect sockfd failed. no server is in serving on ";
+        std::cout << "ip: " << server_ip << " port: " << port << "\n";
         ::close(sockfd);
         return -1;
     }
