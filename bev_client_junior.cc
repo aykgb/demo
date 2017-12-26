@@ -60,7 +60,9 @@ int tcp_connect_server(const char *server_ip, int port) {
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htonl(port);
+    server_addr.sin_port = htons(port); // must not using htonl ?
+    // std::cout << "#### debug: htons(port):" << htons(port) << std::endl;
+    // std::cout << "#### debug: htonl(port):" << htonl(port) << std::endl;
     if(0 == inet_aton(server_ip, &server_addr.sin_addr)) {
         errno = EINVAL;
         std::cout << "invalid ip address.\n";
